@@ -1,3 +1,3 @@
-# color
+# jeb_webside
 
-输入一个词，网站换一套配色：模型 4.9MB，纯浏览器运行，输出 11 个 CSS 变量。
+Change the theme of the website using the input: a 4.9MB model, fully in the browser, emitting 11 CSS variables.

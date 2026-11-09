@@ -1,0 +1,17 @@
+/* Default tokens — prevents a flash of unstyled colour before the model loads.
+   PaletteTheme.apply() overwrites all of them on :root. */
+:root {
+  --pn-bg: #faf8f6;
+  --pn-surface: #ffffff;
+  --pn-surface-alt: #f3efea;
+  --pn-border: #e5ded6;
+  --pn-text: #1d1a17;
+  --pn-muted: #6f665d;
+  --pn-primary: #8a4b5c;
+  --pn-primary-hover: #743c4b;
+  --pn-on-primary: #ffffff;
+  --pn-accent: #b5651d;
+  --pn-danger: #c0392b;
+  color-scheme: light;
+}
+:root[data-pn-mode="dark"] { color-scheme: dark; }

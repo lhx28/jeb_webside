@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PaletteNet · 词语换色</title>
+<link rel="stylesheet" href="palette-theme.css?v=10">
+<style>
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--pn-bg); color:var(--pn-text);
+    font-family: ui-sans-serif, system-ui, "PingFang SC", "Noto Sans CJK SC", -apple-system, sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+    transition: background .55s ease, color .55s ease;
+  }
+  a { color:inherit; text-decoration:none; }
+  .wrap { max-width:1040px; margin:0 auto; padding:0 28px; }
+
+  .hero { padding:96px 0 40px; display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center; }
+  .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; letter-spacing:.14em;
+             text-transform:uppercase; color:var(--pn-muted); margin-bottom:16px; }
+  .eyebrow i { width:26px; height:2px; background:var(--pn-accent); }
+  h1 { font-size:50px; line-height:1.1; letter-spacing:-.02em; margin:0 0 16px; font-weight:700; }
+  h1 em { font-style:normal; color:var(--pn-primary); }
+  .lede { font-size:15.5px; color:var(--pn-muted); margin:0 0 26px; max-width:44ch; }
+
+  .picker { display:flex; gap:10px; align-items:center; }
+  .picker input {
+    flex:1; font:inherit; font-size:16px; color:var(--pn-text);
+    background:var(--pn-surface); border:1px solid var(--pn-border); border-radius:11px;
+    padding:14px 16px; outline:none; transition:border-color .2s, box-shadow .2s;
+  }
+  .picker input::placeholder { color:var(--pn-muted); opacity:.75; }
+  .picker input:focus {
+    border-color:var(--pn-primary);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--pn-primary) 18%, transparent);
+  }
+  .hint { margin-top:10px; font-size:12px; color:var(--pn-muted); }
+  .hint kbd {
+    font-family:ui-monospace,monospace; font-size:11px; padding:1px 5px; border-radius:4px;
+    border:1px solid var(--pn-border); background:var(--pn-surface-alt);
+  }
+
+  .card { background:var(--pn-surface); border:1px solid var(--pn-border); border-radius:16px; }
+  .swatch { padding:18px; box-shadow:0 20px 44px -30px rgba(0,0,0,.55); }
+  .swatch h4 { margin:0 0 12px; font-size:11px; letter-spacing:.12em; color:var(--pn-muted); font-weight:600; }
+  .strip { display:flex; height:96px; border-radius:9px; overflow:hidden; }
+  .ramp { display:flex; flex:1; }
+  .ramp div, .accentsw { flex:1; }
+  .accentsw { flex:0 0 62px; margin-left:7px; border-radius:3px; }
+  .tokens { margin-top:14px; font-family:ui-monospace,monospace; font-size:11px; color:var(--pn-muted);
+            display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; }
+
+  .stack { display:flex; flex-direction:column; gap:14px; }
+  .webpal { padding:16px 18px; }
+  .webpal h4 { margin:0 0 12px; font-size:11px; letter-spacing:.12em; color:var(--pn-muted); font-weight:600; }
+  .wtgrid { display:grid; grid-template-columns:1fr 1fr; gap:7px 14px; }
+  .wt { display:flex; align-items:center; gap:7px; font-family:ui-monospace,monospace; font-size:10.5px; color:var(--pn-muted); }
+  .wt i { width:13px; height:13px; border-radius:4px; flex:0 0 auto;
+          border:1px solid color-mix(in srgb, var(--pn-text) 15%, transparent); }
+  .wt b { color:var(--pn-text); font-weight:500; }
+
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--pn-border);
+           border:1px solid var(--pn-border); border-radius:14px; overflow:hidden; margin:40px 0 56px; }
+  .stat { background:var(--pn-surface); padding:20px 22px; }
+  .stat b { display:block; font-size:25px; letter-spacing:-.02em; }
+  .stat span { font-size:12px; color:var(--pn-muted); }
+
+  .section-title { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--pn-muted); margin:0 0 16px; }
+
+  .tablewrap { overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:80px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; min-width:420px; }
+  th, td { text-align:left; padding:11px 14px; border-bottom:1px solid var(--pn-border); }
+  th { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--pn-muted); font-weight:600; }
+  td:last-child, th:last-child { text-align:right; }
+  tbody tr:hover { background:var(--pn-surface-alt); }
+
+  @media (max-width:820px) {
+    .wrap { padding:0 18px; }
+    .hero { grid-template-columns:1fr; gap:30px; padding:56px 0 24px; }
+    h1 { font-size:36px; }
+    .lede { font-size:15px; margin-bottom:20px; }
+    .stack { gap:12px; }
+    .strip { height:72px; }
+    .stats { grid-template-columns:repeat(2,1fr); margin:28px 0 40px; }
+    .stat { padding:16px 18px; }
+    .stat b { font-size:22px; }
+    .picker input { font-size:16px; padding:13px 14px; }
+    .wtgrid { gap:6px 10px; }
+  }
+  @media (max-width:520px) {
+    h1 { font-size:30px; }
+    .hero { padding-top:40px; }
+    .wtgrid { grid-template-columns:1fr; }
+    .accentsw { flex:0 0 44px; }
+    .tokens { grid-template-columns:1fr; }
+    table { font-size:12.5px; min-width:0; }
+    th, td { padding:9px 10px; }
+    th:nth-child(2), td:nth-child(2) { display:none; }   /* keep token + value visible */
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <div class="eyebrow"><i></i><span>words → colour</span></div>
+      <h1>输入一个词<br>界面就<em>换色</em></h1>
+      <p class="lede">你的词语决定了网站的风格</p>
+      <div class="picker">
+        <input id="w" type="text" autocomplete="off" spellcheck="false"
+               placeholder="樱花 / 深夜的海 / 灵梦 / sakura / 抹茶">
+      </div>
+      <div class="hint">按 <kbd>Enter</kbd> 换色 · 也认英文词和人名</div>
+    </div>
+    <aside class="stack">
+      <div class="card swatch">
+        <h4>MODEL PALETTE · 模型调色板</h4>
+        <div class="strip"><div class="ramp" id="ramp"></div></div>
+        <div class="tokens" id="tokens"></div>
+      </div>
+      <div class="card webpal">
+        <h4>WEB PALETTE · 网页调色板</h4>
+        <div class="wtgrid" id="wtgrid"></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><b id="s-mode">—</b><span id="s-mode-label">模式</span></div>
+    <div class="stat"><b id="s-conf">—</b><span>置信度</span></div>
+    <div class="stat"><b>4.9MB</b><span>本地模型 · 纯 JS</span></div>
+    <div class="stat"><b id="s-time">—</b><span>单次推理</span></div>
+  </section>
+
+  <p class="section-title">令牌对照</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Token</th><th>作用</th><th>当前值</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</main>
+
+<script src="runtime.js?v=10"></script>
+<script src="theme.js?v=10"></script>
+<script>
+const TOKEN_LABEL = {
+  bg: "页面底色", surface: "卡片", surfaceAlt: "次级面板", border: "描边",
+  text: "正文", muted: "次要文字", primary: "主色", primaryHover: "主色 hover",
+  onPrimary: "按钮文字", accent: "强调", danger: "危险",
+};
+const params = new URLSearchParams(location.search);
+const MODE = params.get("mode") || "system";
+const input = document.getElementById("w");
+let prevMode = null;
+
+function paint(word) {
+  const t = PaletteTheme.apply(word, { prevMode });
+  prevMode = t.mode;
+  document.title = word + " · PaletteNet";
+  document.getElementById("s-mode").textContent = t.mode;
+  document.getElementById("s-mode-label").textContent =
+    MODE === "system" ? "模式（跟随系统）" : MODE === "word" ? "模式（词决定）" : "模式（强制 " + MODE + "）";
+  document.getElementById("s-conf").textContent = t.confidence.toFixed(2);
+  document.getElementById("s-time").textContent = t.cached ? "缓存" : t.ms.toFixed(1) + " ms";
+  document.getElementById("ramp").innerHTML =
+    t.scale.map(c => `<div style="background:${c.hex}"></div>`).join("") +
+    (t.contrast ? `<div class="accentsw" style="background:${t.contrast}"></div>` : "");
+  document.getElementById("tokens").innerHTML =
+    [["bg", t.bg], ["text", t.text], ["primary", t.primary], ["accent", t.accent],
+     ["spread", t.hueSpread + "°"], ["mode", t.mode]]
+      .map(([k, v]) => `<span>${k}: ${v}</span>`).join("");
+  document.getElementById("wtgrid").innerHTML = Object.entries(TOKEN_LABEL)
+    .map(([k, label]) => `<div class="wt" title="${label}"><i style="background:${t[k]}"></i>`
+      + `<b>${k.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}</b> ${t[k]}</div>`).join("");
+  document.getElementById("tbody").innerHTML = Object.entries(TOKEN_LABEL)
+    .map(([k, label]) => `<tr><td><code>--pn-${k.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}</code></td>
+      <td>${label}</td><td><code>${t[k]}</code></td></tr>`).join("");
+}
+
+function applyFromInput() {
+  const v = input.value.trim();
+  if (!v) return;
+  history.replaceState(null, "", "?w=" + encodeURIComponent(v) + (MODE !== "system" ? "&mode=" + MODE : ""));
+  paint(v);
+}
+
+input.addEventListener("keydown", e => { if (e.key === "Enter") applyFromInput(); });
+
+PaletteTheme.init({ base: ".", mode: MODE, overrides: "overrides.json" }).then(() => {
+  const w = params.get("w") || "樱花";
+  input.value = w;
+  paint(w);
+  PaletteTheme.onSchemeChange(() => paint(input.value.trim() || "樱花"));
+}).catch(e => { console.error(e); });
+</script>
+</body>
+</html>
